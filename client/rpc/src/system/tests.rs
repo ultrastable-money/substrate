@@ -24,7 +24,6 @@ use jsonrpsee::{
 };
 use sc_network::{self, config::Role, PeerId};
 use sc_rpc_api::system::helpers::PeerInfo;
-use serde_json::value::to_raw_value;
 use sp_core::H256;
 use sp_utils::mpsc::tracing_unbounded;
 use std::{
@@ -61,17 +60,17 @@ fn api<T: Into<Option<Status>>>(sync: T) -> RpcModule<System<Block>> {
 						is_syncing: status.is_syncing,
 						should_have_peers,
 					});
-				},
+				}
 				Request::LocalPeerId(sender) => {
 					let _ =
 						sender.send("QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV".to_string());
-				},
+				}
 				Request::LocalListenAddresses(sender) => {
 					let _ = sender.send(vec![
 						"/ip4/198.51.100.19/tcp/30333/p2p/QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV".to_string(),
 						"/ip4/127.0.0.1/tcp/30334/ws/p2p/QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV".to_string(),
 					]);
-				},
+				}
 				Request::Peers(sender) => {
 					let mut peers = vec![];
 					for _peer in 0..status.peers {
@@ -83,7 +82,7 @@ fn api<T: Into<Option<Status>>>(sync: T) -> RpcModule<System<Block>> {
 						});
 					}
 					let _ = sender.send(peers);
-				},
+				}
 				Request::NetworkState(sender) => {
 					let _ = sender.send(
 						serde_json::to_value(&sc_network::network_state::NetworkState {
@@ -96,35 +95,37 @@ fn api<T: Into<Option<Status>>>(sync: T) -> RpcModule<System<Block>> {
 						})
 						.unwrap(),
 					);
-				},
+				}
 				Request::NetworkAddReservedPeer(peer, sender) => {
 					let _ = match sc_network::config::parse_str_addr(&peer) {
 						Ok(_) => sender.send(Ok(())),
-						Err(s) =>
-							sender.send(Err(error::Error::MalformattedPeerArg(s.to_string()))),
+						Err(s) => {
+							sender.send(Err(error::Error::MalformattedPeerArg(s.to_string())))
+						}
 					};
-				},
+				}
 				Request::NetworkRemoveReservedPeer(peer, sender) => {
 					let _ = match peer.parse::<PeerId>() {
 						Ok(_) => sender.send(Ok(())),
-						Err(s) =>
-							sender.send(Err(error::Error::MalformattedPeerArg(s.to_string()))),
+						Err(s) => {
+							sender.send(Err(error::Error::MalformattedPeerArg(s.to_string())))
+						}
 					};
-				},
+				}
 				Request::NetworkReservedPeers(sender) => {
 					let _ = sender
 						.send(vec!["QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV".to_string()]);
-				},
+				}
 				Request::NodeRoles(sender) => {
 					let _ = sender.send(vec![NodeRole::Authority]);
-				},
+				}
 				Request::SyncState(sender) => {
 					let _ = sender.send(SyncState {
 						starting_block: 1,
 						current_block: 2,
 						highest_block: Some(3),
 					});
-				},
+				}
 			};
 
 			future::ready(())
@@ -293,37 +294,33 @@ async fn system_sync_state() {
 
 #[tokio::test]
 async fn system_network_add_reserved() {
-	let good_peer_id = to_raw_value(&[
-		"/ip4/198.51.100.19/tcp/30333/p2p/QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV",
-	])
-	.unwrap();
-	let good = api(None).call("system_addReservedPeer", Some(good_peer_id)).await.unwrap();
+	let good_peer_id =
+		"/ip4/198.51.100.19/tcp/30333/p2p/QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV";
+	let good = api(None).call_with("system_addReservedPeer", &good_peer_id).await.unwrap();
 
 	let good: JsonRpcResponse<()> = serde_json::from_str(&good).unwrap();
 	assert_eq!(good.result, ());
 
-	let bad_peer_id = to_raw_value(&["/ip4/198.51.100.19/tcp/30333"]).unwrap();
-	let bad = api(None).call("system_addReservedPeer", Some(bad_peer_id)).await.unwrap();
+	let bad_peer_id = "/ip4/198.51.100.19/tcp/30333";
+	let bad = api(None).call_with("system_addReservedPeer", &bad_peer_id).await.unwrap();
 	let bad: JsonRpcError = serde_json::from_str(&bad).unwrap();
 	assert_eq!(bad.error.message, "Peer id is missing from the address");
 }
 
 #[tokio::test]
 async fn system_network_remove_reserved() {
-	let good_peer_id = to_raw_value(&["QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV"]).unwrap();
+	let good_peer_id = "QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV";
 	let good = api(None)
-		.call("system_removeReservedPeer", Some(good_peer_id))
+		.call_with("system_removeReservedPeer", &good_peer_id)
 		.await
 		.expect("call with good peer id works");
 	let good: JsonRpcResponse<()> =
 		serde_json::from_str(&good).expect("call with good peer id returns `JsonRpcResponse`");
 	assert_eq!(good.result, ());
 
-	let bad_peer_id = to_raw_value(&[
-		"/ip4/198.51.100.19/tcp/30333/p2p/QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV",
-	])
-	.unwrap();
-	let bad = api(None).call("system_removeReservedPeer", Some(bad_peer_id)).await.unwrap();
+	let bad_peer_id =
+		"/ip4/198.51.100.19/tcp/30333/p2p/QmSk5HQbn6LhUwDiNMseVUjuRYhEtYj4aUZ6WfWoGURpdV";
+	let bad = api(None).call_with("system_removeReservedPeer", &bad_peer_id).await.unwrap();
 	let bad: JsonRpcError = serde_json::from_str(&bad).unwrap();
 	assert_eq!(
 		bad.error.message,
@@ -341,9 +338,6 @@ async fn system_network_reserved_peers() {
 	);
 }
 
-// TODO: (dp) This hangs. Likely have to make this a normal test and execute the RPC calls manually
-// on an executor.
-#[ignore]
 #[test]
 fn test_add_reset_log_filter() {
 	const EXPECTED_BEFORE_ADD: &'static str = "EXPECTED_BEFORE_ADD";
@@ -356,45 +350,24 @@ fn test_add_reset_log_filter() {
 		for line in std::io::stdin().lock().lines() {
 			let line = line.expect("Failed to read bytes");
 			if line.contains("add_reload") {
-				let filter = to_raw_value(&"test_after_add").unwrap();
-				let fut = async move { api(None).call("system_addLogFilter", Some(filter)).await };
+				let filter = "test_after_add";
+				let fut = async move { api(None).call_with("system_addLogFilter", &filter).await };
 				futures::executor::block_on(fut).expect("`system_add_log_filter` failed");
 			} else if line.contains("add_trace") {
-				let filter = to_raw_value(&"test_before_add=trace").unwrap();
-				let fut = async move { api(None).call("system_addLogFilter", Some(filter)).await };
+				let filter = "test_before_add=trace";
+				let fut = async move { api(None).call_with("system_addLogFilter", &filter).await };
 				futures::executor::block_on(fut).expect("`system_add_log_filter (trace)` failed");
 			} else if line.contains("reset") {
 				let fut = async move { api(None).call("system_resetLogFilter", None).await };
-				futures::executor::block_on(fut).expect("`system_add_log_filter (trace)` failed");
+				futures::executor::block_on(fut).expect("`system_resetLogFilter` failed");
 			} else if line.contains("exit") {
-				return
+				return;
 			}
 			log::trace!(target: "test_before_add", "{}", EXPECTED_WITH_TRACE);
 			log::debug!(target: "test_before_add", "{}", EXPECTED_BEFORE_ADD);
 			log::debug!(target: "test_after_add", "{}", EXPECTED_AFTER_ADD);
 		}
 	}
-
-	// Call this test again to enter the log generation / filter reload block
-	let test_executable = env::current_exe().expect("Unable to get current executable!");
-	let mut child_process = Command::new(test_executable)
-		.env("TEST_LOG_FILTER", "1")
-		.args(&["--nocapture", "test_add_reset_log_filter"])
-		.stdin(Stdio::piped())
-		.stderr(Stdio::piped())
-		.spawn()
-		.unwrap();
-
-	let child_stderr = child_process.stderr.take().expect("Could not get child stderr");
-	let mut child_out = BufReader::new(child_stderr);
-	let mut child_in = child_process.stdin.take().expect("Could not get child stdin");
-
-	let mut read_line = || {
-		let mut line = String::new();
-		child_out.read_line(&mut line).expect("Reading a line");
-		println!("[main test, readline] Read '{:?}'", line);
-		line
-	};
 
 	// Call this test again to enter the log generation / filter reload block
 	let test_executable = env::current_exe().expect("Unable to get current executable!");

@@ -13,8 +13,8 @@ readme = "README.md"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-jsonrpsee-ws-client = { git = "https://github.com/paritytech/jsonrpsee", branch = "dp-debug-substrate-tests", default-features = false }
-jsonrpsee-proc-macros = { git = "https://github.com/paritytech/jsonrpsee", branch = "dp-debug-substrate-tests" }
+jsonrpsee-ws-client = { git = "https://github.com/paritytech/jsonrpsee", branch = "na-rpc-module-test-helper", default-features = false }
+jsonrpsee-proc-macros = { git = "https://github.com/paritytech/jsonrpsee", branch = "na-rpc-module-test-helper" }
 # jsonrpsee-ws-client = { version = "0.3.0", default-features = false }
 # jsonrpsee-proc-macros = "0.3.0"
 

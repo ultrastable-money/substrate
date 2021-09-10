@@ -23,6 +23,7 @@ use codec::Encode;
 use futures::executor;
 use jsonrpsee::types::v2::response::JsonRpcResponse;
 use sc_transaction_pool::{BasicPool, FullChainApi};
+use serde_json::value::to_raw_value;
 use sp_core::{
 	blake2_256,
 	crypto::{CryptoTypePublicPair, Pair, Public},
@@ -39,7 +40,6 @@ use substrate_test_runtime_client::{
 	runtime::{Block, Extrinsic, SessionKeys, Transfer},
 	AccountKeyring, Backend, Client, DefaultTestClientBuilderExt, TestClientBuilderExt,
 };
-use serde_json::value::to_raw_value;
 
 fn uxt(sender: AccountKeyring, nonce: u64) -> Extrinsic {
 	let tx =
@@ -86,22 +86,14 @@ async fn submit_transaction_should_not_cause_error() {
 	let p = TestSetup::default().author();
 	let api = p.into_rpc();
 	let xt = uxt(AccountKeyring::Alice, 1).encode();
+	let param: Bytes = xt.clone().into();
 	let h: H256 = blake2_256(&xt).into();
-	let params = to_raw_value(&xt.clone()).unwrap();
-	let o = api.call("author_submitExtrinsic", Some(params)).await.unwrap();
+	let o = api.call_with("author_submitExtrinsic", &param).await.unwrap();
 	log::debug!("submitExtrinsic result: {:?}", o);
 	let poo: JsonRpcResponse<H256> = serde_json::from_str(&o).unwrap();
-	assert_eq!(
-		poo.result,
-		h,
-	);
-	// let params_again = to_raw_value(&[xt]).unwrap();
-	// assert!(api.call("submitExtrinsic", Some(params_again)).is_err().await.unwrap());
-	// assert_matches!(
-	// 	executor::block_on(AuthorApi::submit_extrinsic(&p, xt.clone().into())),
-	// 	Ok(h2) if h == h2
-	// );
-	// assert!(executor::block_on(AuthorApi::submit_extrinsic(&p, xt.into())).is_err());
+	assert_eq!(poo.result, h);
+	let o = api.call_with("submitExtrinsic", &param).await.unwrap();
+	assert!(serde_json::from_str::<JsonRpcResponse<H256>>(&o).is_err());
 }
 
 // #[test]

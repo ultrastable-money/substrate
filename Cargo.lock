@@ -2783,7 +2783,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "jsonrpsee-http-client",
  "jsonrpsee-http-server",
@@ -2797,7 +2797,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-http-client"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "async-trait",
  "fnv",
@@ -2817,7 +2817,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-http-server"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "futures-channel",
  "futures-util",
@@ -2838,11 +2838,10 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-proc-macros"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "Inflector",
  "bae",
- "log",
  "proc-macro-crate",
  "proc-macro2",
  "quote",
@@ -2852,7 +2851,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-types"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2870,7 +2869,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-utils"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "beef",
  "futures-channel",
@@ -2884,13 +2883,12 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "tokio",
 ]
 
 [[package]]
 name = "jsonrpsee-ws-client"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "async-trait",
  "fnv",
@@ -2913,7 +2911,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-ws-server"
 version = "0.3.0"
-source = "git+https://github.com/paritytech/jsonrpsee?branch=dp-debug-substrate-tests#02343c24f77bfada73fdf4e5ddbd617a728260be"
+source = "git+https://github.com/paritytech/jsonrpsee?branch=na-rpc-module-test-helper#7967bc3a1b277ea13e290c94f04fa514aa52b099"
 dependencies = [
  "futures-channel",
  "futures-util",
