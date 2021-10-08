@@ -56,8 +56,7 @@ use std::{
 use graph::{ExtrinsicHash, IsValidator};
 use sc_transaction_pool_api::{
 	ChainEvent, ImportNotificationStream, MaintainedTransactionPool, PoolFuture, PoolStatus,
-	ReadyTransactions, TransactionFor, TransactionPool, TransactionSource,
-	TransactionStatusStreamFor, TxHash,
+	TransactionFor, TransactionPool, TransactionSource, TransactionStatusStreamFor, TxHash,
 };
 use sp_core::traits::SpawnEssentialNamed;
 use sp_runtime::{
@@ -70,7 +69,7 @@ use crate::metrics::MetricsLink as PrometheusMetrics;
 use prometheus_endpoint::Registry as PrometheusRegistry;
 
 type BoxedReadyIterator<Hash, Data> =
-	Box<dyn ReadyTransactions<Item = Arc<graph::base_pool::Transaction<Hash, Data>>> + Send>;
+	Box<dyn Iterator<Item = Arc<graph::base_pool::Transaction<Hash, Data>>> + Send>;
 
 type ReadyIteratorFor<PoolApi> =
 	BoxedReadyIterator<graph::ExtrinsicHash<PoolApi>, graph::ExtrinsicFor<PoolApi>>;
