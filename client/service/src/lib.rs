@@ -34,7 +34,7 @@ mod client;
 mod metrics;
 mod task_manager;
 
-use std::{collections::HashMap, pin::Pin, task::Poll};
+use std::{collections::HashMap, pin::Pin, task::Poll, net::SocketAddr};
 
 use codec::{Decode, Encode};
 use futures::{stream, FutureExt, Stream, StreamExt};
@@ -305,9 +305,20 @@ fn start_rpc_servers<R>(
 where
 	R: FnOnce(sc_rpc::DenyUnsafe) -> Result<RpcModule<()>, Error>,
 {
-	let module = gen_rpc_module(sc_rpc::DenyUnsafe::Yes)?;
+
+	fn deny_unsafe(http_addr: &SocketAddr, ws_addr: &SocketAddr, methods: &RpcMethods) -> sc_rpc::DenyUnsafe {
+		let is_exposed_addr = !http_addr.ip().is_loopback() || !ws_addr.ip().is_loopback();
+		match (is_exposed_addr, methods) {
+			| (_, RpcMethods::Unsafe) | (false, RpcMethods::Auto) => sc_rpc::DenyUnsafe::No,
+			_ => sc_rpc::DenyUnsafe::Yes,
+		}
+	}
+
 	let ws_addr = config.rpc_ws.unwrap_or_else(|| "127.0.0.1:9944".parse().unwrap());
 	let http_addr = config.rpc_http.unwrap_or_else(|| "127.0.0.1:9933".parse().unwrap());
+	// TODO(niklasad1): we need gen_rpc_module for each server because the addresses might be
+	// different.
+	let module = gen_rpc_module(deny_unsafe(&http_addr, &ws_addr, &config.rpc_methods))?;
 
 	let http = sc_rpc_server::start_http(
 		http_addr,
