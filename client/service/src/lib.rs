@@ -34,13 +34,12 @@ mod client;
 mod metrics;
 mod task_manager;
 
-use std::{collections::HashMap, pin::Pin, task::Poll, net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr, pin::Pin, task::Poll};
 
 use codec::{Decode, Encode};
 use futures::{stream, FutureExt, Stream, StreamExt};
 use jsonrpsee::RpcModule;
 use log::{debug, error, warn};
-use parity_util_mem::MallocSizeOf;
 use sc_client_api::{blockchain::HeaderBackend, BlockchainEvents};
 use sc_network::PeerId;
 use sc_utils::mpsc::TracingUnboundedReceiver;
@@ -81,16 +80,6 @@ pub use std::{ops::Deref, result::Result, sync::Arc};
 pub use task_manager::{SpawnTaskHandle, TaskManager};
 
 const DEFAULT_PROTOCOL_ID: &str = "sup";
-
-/// A type that implements `MallocSizeOf` on native but not wasm.
-#[cfg(not(target_os = "unknown"))]
-pub trait MallocSizeOfWasm: MallocSizeOf {}
-#[cfg(target_os = "unknown")]
-pub trait MallocSizeOfWasm {}
-#[cfg(not(target_os = "unknown"))]
-impl<T: MallocSizeOf> MallocSizeOfWasm for T {}
-#[cfg(target_os = "unknown")]
-impl<T> MallocSizeOfWasm for T {}
 
 /// An incomplete set of chain components, but enough to run the chain ops subcommands.
 pub struct PartialComponents<Client, Backend, SelectChain, ImportQueue, TransactionPool, Other> {
@@ -306,8 +295,8 @@ where
 	R: FnOnce(sc_rpc::DenyUnsafe) -> Result<RpcModule<()>, Error>,
 {
 
-	fn deny_unsafe(http_addr: &SocketAddr, ws_addr: &SocketAddr, methods: &RpcMethods) -> sc_rpc::DenyUnsafe {
-		let is_exposed_addr = !http_addr.ip().is_loopback() || !ws_addr.ip().is_loopback();
+	fn deny_unsafe(addrs: &[SocketAddr], methods: &RpcMethods) -> sc_rpc::DenyUnsafe {
+		let is_exposed_addr = addrs.iter().any(|addr| !addr.ip().is_loopback());
 		match (is_exposed_addr, methods) {
 			| (_, RpcMethods::Unsafe) | (false, RpcMethods::Auto) => sc_rpc::DenyUnsafe::No,
 			_ => sc_rpc::DenyUnsafe::Yes,
@@ -316,9 +305,12 @@ where
 
 	let ws_addr = config.rpc_ws.unwrap_or_else(|| "127.0.0.1:9944".parse().unwrap());
 	let http_addr = config.rpc_http.unwrap_or_else(|| "127.0.0.1:9933".parse().unwrap());
-	// TODO(niklasad1): we need gen_rpc_module for each server because the addresses might be
-	// different.
-	let module = gen_rpc_module(deny_unsafe(&http_addr, &ws_addr, &config.rpc_methods))?;
+
+	// TODO(niklasad1): this force the same policy even if the one of the addresses is
+	// local only.
+	//
+	// Ideally we should have to different builders but annoying refactoring to do...
+	let module = gen_rpc_module(deny_unsafe(&[ws_addr, http_addr], &config.rpc_methods))?;
 
 	let http = sc_rpc_server::start_http(
 		http_addr,
