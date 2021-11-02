@@ -90,7 +90,7 @@ use frame_support::{
 	},
 	weights::{
 		extract_actual_weight, DispatchClass, DispatchInfo, PerDispatchClass, RuntimeDbWeight,
-		Weight,
+		Weight, GetDispatchInfo,
 	},
 	Parameter,
 };
@@ -179,7 +179,7 @@ pub mod pallet {
 			+ OriginTrait<Call = Self::Call>;
 
 		/// The aggregated `Call` type.
-		type Call: Dispatchable + Debug;
+		type Call: Dispatchable<Origin = Self::Origin, PostInfo = frame_support::weights::PostDispatchInfo> + Debug + GetDispatchInfo + FullCodec;
 
 		/// Account index (aka nonce) type. This stores the number of previous transactions
 		/// associated with a sender account.

@@ -138,6 +138,7 @@ members = [
 	"frame/bags-list",
 	"frame/bags-list/remote-tests",
 	"frame/bags-list/fuzzer",
+	"frame/whitelist",
 	"primitives/api",
 	"primitives/api/proc-macro",
 	"primitives/api/test",
