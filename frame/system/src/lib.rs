@@ -90,7 +90,7 @@ use frame_support::{
 	},
 	weights::{
 		extract_actual_weight, DispatchClass, DispatchInfo, PerDispatchClass, RuntimeDbWeight,
-		Weight, GetDispatchInfo,
+		Weight,
 	},
 	Parameter,
 };
@@ -179,7 +179,7 @@ pub mod pallet {
 			+ OriginTrait<Call = Self::Call>;
 
 		/// The aggregated `Call` type.
-		type Call: Dispatchable<Origin = Self::Origin, PostInfo = frame_support::weights::PostDispatchInfo> + Debug + GetDispatchInfo + FullCodec;
+		type Call: Dispatchable + Debug;
 
 		/// Account index (aka nonce) type. This stores the number of previous transactions
 		/// associated with a sender account.
@@ -560,6 +560,8 @@ pub mod pallet {
 		NonDefaultComposite,
 		/// There is a non-zero reference count preventing the account from being purged.
 		NonZeroRefCount,
+		/// The origin filter prevent the call to be dispatched.
+		CallFiltered,
 	}
 
 	/// Exposed trait-generic origin type.

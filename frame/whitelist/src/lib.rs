@@ -1,6 +1,6 @@
 // This file is part of Substrate.
 
-// Copyright (C) 2017-2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Parity Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,16 +22,29 @@
 //!
 //! ## Overview
 //!
-//! Allow some origin to whitelist some call, and another origin to dispatch them with the root
-//! origin.
+//! Allow some configurable origin: [`Config::WhitelistOrigin`] to whitelist some hash of a call,
+//! and allow another configurable origin: [`Config::DispatchWhitelistedOrigin`] to dispatch them
+//! with the root origin.
+//!
+//! In the meantime the call corresponding to the hash must have been submitted to the to the
+//! pre-image handler [`PreimageHandler`].
 
 #![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(test)]
+mod tests;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 use sp_runtime::traits::Dispatchable;
 use sp_std::prelude::*;
 
-use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{ensure, traits::PreimageHandler, weights::GetDispatchInfo};
+use codec::{Decode, Encode, MaxEncodedLen, FullCodec};
+use frame_support::{
+	ensure,
+	traits::PreimageHandler,
+	weights::{GetDispatchInfo, PostDispatchInfo},
+};
 use scale_info::TypeInfo;
 
 use frame_support::pallet_prelude::*;
@@ -53,12 +66,22 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// The overarching event type.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		/// The overarching call type.
+		type Call: IsType<<Self as frame_system::Config>::Call>
+			+ Dispatchable<Origin = Self::Origin, PostInfo = PostDispatchInfo>
+			+ GetDispatchInfo
+			+ FullCodec
+			+ From<frame_system::Call<Self>>;
+
 		/// Required origin for whitelisting a call.
 		type WhitelistOrigin: EnsureOrigin<Self::Origin>;
+
 		/// Required origin for dispatching whitelisted call with root origin.
 		type DispatchWhitelistedOrigin: EnsureOrigin<Self::Origin>;
+
 		/// The handler of pre-images.
-		type PreimageHandler: frame_support::traits::PreimageHandler<Self::Hash>;
+		type PreimageHandler: PreimageHandler<Self::Hash>;
 	}
 
 	#[pallet::pallet]
@@ -125,12 +148,16 @@ pub mod pallet {
 			let call = T::PreimageHandler::get_preimage(call_hash)
 				.ok_or(Error::<T>::UnavailablePreImage)?;
 
-			let call = T::Call::decode(&mut &call[..]).map_err(|_| Error::<T>::UndecodableCall)?;
+			let call = <T as Config>::Call::decode(&mut &call[..])
+				.map_err(|_| Error::<T>::UndecodableCall)?;
 
 			ensure!(
 				call.get_dispatch_info().weight <= call_weight_witness,
 				Error::<T>::InvalidCallWeightWitness
 			);
+
+			T::PreimageHandler::clear_preimage(call_hash);
+
 			let result = call.dispatch(frame_system::Origin::<T>::Root.into());
 
 			Self::deposit_event(Event::<T>::WhitelistedCallDispatched { call_hash });

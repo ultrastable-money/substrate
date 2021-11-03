@@ -20,9 +20,12 @@ sp-io = { version = "4.0.0-dev", default-features = false, path = "../../primiti
 sp-runtime = { version = "4.0.0-dev", default-features = false, path = "../../primitives/runtime" }
 frame-support = { version = "4.0.0-dev", default-features = false, path = "../support" }
 frame-system = { version = "4.0.0-dev", default-features = false, path = "../system" }
+frame-benchmarking = { version = "4.0.0-dev", default-features = false, path = "../benchmarking", optional = true }
 
 [dev-dependencies]
 sp-core = { version = "4.0.0-dev", path = "../../primitives/core" }
+pallet-preimage = { version = "4.0.0-dev", path = "../preimage/" }
+pallet-balances = { version = "4.0.0-dev", path = "../balances/" }
 
 [features]
 default = ["std"]
@@ -34,5 +37,10 @@ std = [
 	"sp-runtime/std",
 	"frame-support/std",
 	"frame-system/std",
+]
+runtime-benchmarks = [
+	"frame-benchmarking",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
 ]
 try-runtime = ["frame-support/try-runtime"]
