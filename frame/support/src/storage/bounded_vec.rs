@@ -201,6 +201,12 @@ impl<T, S> Default for BoundedVec<T, S> {
 	}
 }
 
+
+#[derive(crate::RuntimeDebug, MaxEncodedLen, Encode, Decode)]
+pub struct MyStruct<AccountId, MaxMembers: Get<u32>> {
+	bounded_vec: BoundedVec<AccountId, MaxMembers>,
+}
+
 impl<T, S> sp_std::fmt::Debug for BoundedVec<T, S>
 where
 	T: sp_std::fmt::Debug,

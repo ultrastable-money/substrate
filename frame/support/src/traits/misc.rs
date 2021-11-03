@@ -192,6 +192,9 @@ pub trait Time {
 pub trait UnixTime {
 	/// Return duration since `SystemTime::UNIX_EPOCH`.
 	fn now() -> core::time::Duration;
+
+	/// Return the duration between `SystemTime::UNIX_EPOCH` and the first block.
+	fn first_block() -> core::time::Duration;
 }
 
 /// Trait to be used when types are exactly same.

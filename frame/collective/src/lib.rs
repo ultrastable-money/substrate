@@ -19,25 +19,37 @@
 //! through dispatched calls from one of two specialized origins.
 //!
 //! The membership can be provided in one of two ways: either directly, using the Root-dispatchable
-//! function `set_members`, or indirectly, through implementing the `ChangeMembers`.
-//! The pallet assumes that the amount of members stays at or below `MaxMembers` for its weight
-//! calculations, but enforces this neither in `set_members` nor in `change_members_sorted`.
+//! function [`Call::set_members`], or indirectly, through implementing the [`ChangeMembers`].
+//! Note that both way can be incompatible and calling [`Call::set_members`] while the members are
+//! managed through [`ChangeMembers`] may result in errors in case the manager is not updated at
+//! the same time.
+//! The pallet assumes that the amount of members stays at or below [`Config::MaxMembers`] for its
+//! weight calculations, but enforces this neither in [`Call::set_members`] nor in
+//! [`ChangeMembers::change_members_sorted`].
 //!
 //! A "prime" member may be set to help determine the default vote behavior based on chain
-//! config. If `PrimeDefaultVote` is used, the prime vote acts as the default vote in case of any
-//! abstentions after the voting period. If `MoreThanMajorityThenPrimeDefaultVote` is used, then
+//! config: [`Config::DefaultVote`]. If [`PrimeDefaultVote`] is used, the prime vote acts as the default vote in case of any
+//! abstentions after the voting period. If [`MoreThanMajorityThenPrimeDefaultVote`] is used, then
 //! abstentions will first follow the majority of the collective voting, and then the prime
-//! member.
+//! member. If [`DefaultVoteNo`] is used then any abstentions after the voting period is a no vote.
 //!
 //! Voting happens through motions comprising a proposal (i.e. a curried dispatchable) plus a
 //! number of approvals required for it to pass and be called. Motions are open for members to
-//! vote on for a minimum period given by `MotionDuration`. As soon as the needed number of
-//! approvals is given, the motion is closed and executed. If the number of approvals is not reached
-//! during the voting period, then `close` may be called by any account in order to force the end
-//! the motion explicitly. If a prime member is defined then their vote is used in place of any
-//! abstentions and the proposal is executed if there are enough approvals counting the new votes.
+//! vote on for a minimum period given by [`Config::MotionDuration`].
+//! After this duration any account can call into [`Call::close`] in order to close the proposal.
+//! Abstentions vote are fixed to approvals or rejections depending on the prime vote and the [`Config::DefaultVote`] configuration.
+//! If the proposal required approvals is reached then the proposal is executed, otherwise it is dropped.
 //!
-//! If there are not, or if no prime is set, then the motion is dropped without being executed.
+//! A member can hold multiple votes, that means when they approve or reject a proposal, the
+//! proposal approvals or rejection will increase or decrease by the number of vote the member has.
+//! A member will always approve or reject  with all its vote, and can't approve or reject with a
+//! subset of its vote.
+//!
+//! A member can get a new vote per configured period: [`Config::VoteIncreasePeriod`]. This new
+//! vote must be confirmed with the extrinsic [`Call::confirm_member_vote_increase`].
+//! The number of vote of a member can be reset with [`Call::reset_member_votes`].
+//! Note: if a member can get 1 new vote, but it hasn't been confirmed, after 2 period of time, the
+//! member can get 2 new vote. The specified origin will need to call the confirmation 2 times.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "128"]
@@ -53,7 +65,7 @@ use frame_support::{
 	dispatch::{DispatchError, DispatchResultWithPostInfo, Dispatchable, PostDispatchInfo},
 	ensure,
 	traits::{
-		Backing, ChangeMembers, EnsureOrigin, Get, GetBacking, InitializeMembers, StorageVersion,
+		Backing, ChangeMembers, EnsureOrigin, Get, GetBacking, InitializeMembers, StorageVersion, UnixTime,
 	},
 	weights::{GetDispatchInfo, Weight},
 };
@@ -75,7 +87,7 @@ pub type ProposalIndex = u32;
 /// A number of members.
 pub type MemberCount = u32;
 
-/// A number of votes. A member can have multiple vote points.
+/// A number of votes. A member can have multiple votes.
 pub type VoteCount = u32;
 
 /// Default voting strategy when a member is inactive.
@@ -159,11 +171,42 @@ impl<AccountId, I> GetBacking for RawOrigin<AccountId, I> {
 	}
 }
 
-/// Information associated to a member.
+/// Vote information associated to a member.
+///
+/// A subset of [`MemberInfo`].
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
+pub struct MemberVoteInfo<AccountId> {
+	/// Account id of the member.
+	id: AccountId,
+	/// Number of vote the member has.
+	votes: VoteCount,
+}
+
+impl<AccountId> From<MemberInfo<AccountId>> for MemberVoteInfo<AccountId> {
+	fn from(x: MemberInfo<AccountId>) -> Self {
+		Self {
+			id: x.id,
+			votes: x.votes,
+		}
+	}
+}
+
+/// All information assocaited to a member.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct MemberInfo<AccountId> {
+	/// Account id of the member.
 	id: AccountId,
+	/// Number of vote the member has.
 	votes: VoteCount,
+	/// The momen expressed as some seconds since UNIX_EPOCH, or none if it is genesis time.
+	///
+	/// This is the moment of the last vote increase which has been confirmed.
+	///
+	/// NOTE: It shouldn't be confused with the moment of the confirmation itself. If a member
+	/// start at time N then at `N + vote_increase_period`, it can get a new vote.
+	/// Once this new vote is confirmed, the member will have this field updated to
+	/// `N + vote_increase_period`.
+	last_vote_increase: Option<u64>,
 }
 
 /// Info for keeping track of a motion being voted on.
@@ -174,9 +217,9 @@ pub struct Votes<AccountId, BlockNumber> {
 	/// The number of approval votes that are needed to pass the motion.
 	threshold: VoteCount,
 	/// The current set of voters that approved it.
-	ayes: Vec<MemberInfo<AccountId>>,
+	ayes: Vec<MemberVoteInfo<AccountId>>,
 	/// The current set of voters that rejected it.
-	nays: Vec<MemberInfo<AccountId>>,
+	nays: Vec<MemberVoteInfo<AccountId>>,
 	/// The hard end time of this vote.
 	end: BlockNumber,
 }
@@ -215,6 +258,10 @@ pub mod pallet {
 		/// Maximum number of proposals allowed to be active in parallel.
 		type MaxProposals: Get<ProposalIndex>;
 
+		/// The time in seconds after which a member can receive a new vote.
+		#[pallet::constant]
+		type VoteIncreasePeriod: Get<u64>;
+
 		/// The maximum number of members supported by the pallet. Used for weight estimation.
 		///
 		/// NOTE:
@@ -223,10 +270,15 @@ pub mod pallet {
 		type MaxMembers: Get<VoteCount>;
 
 		/// Default vote strategy of this collective.
+		///
+		/// Some usual implementation can be [`PrimeDefaultVote`].
 		type DefaultVote: DefaultVote;
 
-		/// Required origin for the call [`Call::increase_member_votes`].
-		type IncreaseVotesOrigin: EnsureOrigin<<Self as frame_system::Config>::Origin>;
+		/// Required origin for the call [`Call::confirm_member_vote_increase`].
+		type ConfirmVoteIncreaseOrigin: EnsureOrigin<<Self as frame_system::Config>::Origin>;
+
+		/// A provider to unix time.
+		type UnixTime: UnixTime;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -350,6 +402,8 @@ pub mod pallet {
 		WrongProposalWeight,
 		/// The given length bound for the proposal was too low.
 		WrongProposalLength,
+		/// The member has got a new vote confirmed but actually has no new vote to claim.
+		InvalidVoteIncreaseConfirmation,
 	}
 
 	// Note that councillor operations are assigned to the operational class.
@@ -633,7 +687,7 @@ pub mod pallet {
 				if let Some(index) = position_yes {
 					voting.ayes[index].votes = who_info.votes;
 				} else {
-					voting.ayes.push(who_info.clone());
+					voting.ayes.push(who_info.clone().into());
 				}
 				if let Some(pos) = position_no {
 					voting.nays.swap_remove(pos);
@@ -642,7 +696,7 @@ pub mod pallet {
 				if let Some(index) = position_no {
 					voting.nays[index].votes = who_info.votes;
 				} else {
-					voting.nays.push(who_info.clone());
+					voting.nays.push(who_info.clone().into());
 				}
 				if let Some(pos) = position_yes {
 					voting.ayes.swap_remove(pos);
@@ -826,29 +880,39 @@ pub mod pallet {
 			Ok(Some(T::WeightInfo::disapprove_proposal(proposal_count)).into())
 		}
 
-		/// Increase the number of vote token, for the member `beneficiary`.
+		/// Confirm the increase of the number of vote of the member `beneficiary`.
 		///
-		/// Must be called by an origin satisfying `[Config::IncreaseVotesOrigin]`.
+		/// Every period of time as configured in [`Config::VoteIncreasePeriod`] a member can get a
+		/// new vote, this increase is not automatic, and this extrinsic confirm and apply this
+		/// increase.
+		///
+		/// Must be called by an origin satisfying `[Config::ConfirmVoteIncreaseOrigin]`.
 		///
 		/// NOTE: This doesn't upgrade the current votes of `beneficiary`. The user can still call
-		/// [`Call::vote`] again, to update its vote.
+		/// [`Call::vote`] again, to update its vote on a proposal.
 		#[pallet::weight(0)]
-		pub fn increase_member_votes(
+		pub fn confirm_member_vote_increase(
 			origin: OriginFor<T>,
 			beneficiary: T::AccountId,
 		) -> DispatchResult {
-			T::IncreaseVotesOrigin::ensure_origin(origin)?;
+			T::ConfirmVoteIncreaseOrigin::ensure_origin(origin)?;
 
 			Members::<T, I>::mutate(|members| {
-				if let Some(member) = members.iter_mut().find(|info| info.id == beneficiary) {
-					member.votes = member.votes.saturating_add(1);
-				}
-			});
+				let member = members.iter_mut().find(|info| info.id == beneficiary)
+					.ok_or(Error::<T, I>::NotMember)?;
+				let member_start_time = member.last_vote_increase.unwrap_or_else(|| T::UnixTime::first_block().as_secs());
+				let now = T::UnixTime::now().as_secs();
+				let vote_increase_period = T::VoteIncreasePeriod::get();
+				ensure!(member_start_time + vote_increase_period <= now, Error::<T, I>::InvalidVoteIncreaseConfirmation);
 
-			Ok(())
+				member.last_vote_increase = Some(member_start_time - vote_increase_period);
+				member.votes = member.votes.saturating_add(1);
+
+				Ok(())
+			})
 		}
 
-		/// Increase the number of vote token, for the member.
+		/// Reset the number of vote token, for the member.
 		///
 		/// Must be called by the Root origin.
 		///
@@ -859,15 +923,15 @@ pub mod pallet {
 			member: T::AccountId,
 			votes: VoteCount,
 		) -> DispatchResult {
-			T::IncreaseVotesOrigin::ensure_origin(origin)?;
+			T::ConfirmVoteIncreaseOrigin::ensure_origin(origin)?;
 
 			Members::<T, I>::mutate(|members| {
-				if let Some(member) = members.iter_mut().find(|info| info.id == member) {
-					member.votes = votes;
-				}
-			});
+				let member = members.iter_mut().find(|info| info.id == member)
+					.ok_or(Error::<T, I>::NotMember)?;
+				member.votes = votes;
 
-			Ok(())
+				Ok(())
+			})
 		}
 	}
 }
@@ -1020,7 +1084,7 @@ impl<T: Config<I>, I: 'static> ChangeMembers<T::AccountId> for Pallet<T, I> {
 			for incoming in incoming {
 				match mutate.binary_search_by_key(&incoming, |info| &info.id) {
 					Err(index) =>
-						mutate.insert(index, MemberInfo { id: incoming.clone(), votes: 1 }),
+						mutate.insert(index, MemberInfo { id: incoming.clone(), votes: 1, last_vote_increase: Some(T::UnixTime::now().as_secs()) }),
 					_ => log::error!(
 						target: "runtime::collective",
 						"Unexpected incoming member alread exist in member set.",
@@ -1046,7 +1110,10 @@ impl<T: Config<I>, I: 'static> InitializeMembers<T::AccountId> for Pallet<T, I> 
 			assert!(<Members<T, I>>::get().is_empty(), "Members are already initialized!");
 			let mut members = members.to_vec();
 			members.sort();
-			<Self as ChangeMembers<T::AccountId>>::set_members_sorted(&members, &[])
+			// Note: this function is called at genesis by definition.
+			let members = members.into_iter().map(|id| MemberInfo { id, votes: 1, last_vote_increase: None }).collect::<Vec<_>>();
+
+			Members::<T, I>::put(members);
 		}
 	}
 }

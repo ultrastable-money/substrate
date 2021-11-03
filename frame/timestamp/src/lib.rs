@@ -152,6 +152,11 @@ pub mod pallet {
 	#[pallet::storage]
 	pub(super) type DidUpdate<T: Config> = StorageValue<_, bool, ValueQuery>;
 
+	/// First block time.
+	#[pallet::storage]
+	#[pallet::getter(fn now)]
+	pub type FirstBlock<T: Config> = StorageValue<_, T::Moment, ValueQuery>;
+
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		/// dummy `on_initialize` to return the weight used in `on_finalize`.
@@ -200,6 +205,9 @@ pub mod pallet {
 				"Timestamp must increment by at least <MinimumPeriod> between sequential blocks"
 			);
 			Now::<T>::put(now);
+			if !FirstBlock::<T>::exists() {
+				FirstBlock::<T>::insert(now);
+			}
 			DidUpdate::<T>::put(true);
 
 			<T::OnTimestampSet as OnTimestampSet<_>>::on_timestamp_set(now);
@@ -300,6 +308,21 @@ impl<T: Config> UnixTime for Pallet<T> {
 			}
 		}
 		core::time::Duration::from_millis(now.saturated_into::<u64>())
+	}
+
+	fn first_block() -> core::time::Duration {
+		// now is duration since unix epoch in millisecond as documented in
+		// `sp_timestamp::InherentDataProvider`.
+		let first_block = FirstBlock::<T>::get();
+		sp_std::if_std! {
+			if first_block == T::Moment::zero() {
+				log::error!(
+					target: "runtime::timestamp",
+					"`pallet_timestamp::UnixTime::first_block` is called at genesis, invalid value returned: 0",
+				);
+			}
+		}
+		core::time::Duration::from_millis(first_block.saturated_into::<u64>())
 	}
 }
 
