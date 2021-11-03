@@ -51,7 +51,11 @@
 //! vote must be confirmed with the extrinsic [`Call::confirm_member_vote_increase`].
 //! The number of vote of a member can be reset with [`Call::reset_member_votes`].
 //! Note: if a member can get 1 new vote, but it hasn't been confirmed, after 2 period of time, the
-//! member can get 2 new vote. The specified origin will need to call the confirmation 2 times.
+//! member can get 2 new vote. The specified origin will need to confirm the increase 2 times.
+//!
+//! Additionally a payment system can be set to pay members. The payment happens every
+//! [`Config::PaymentInterval`] and it of the amount: `payment_base * √vote_count` where payment
+//! base is configured  with [`Config::PaymentBase`].
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "128"]
@@ -59,7 +63,10 @@
 use scale_info::TypeInfo;
 use sp_core::u32_trait::Value as U32;
 use sp_io::storage;
-use sp_runtime::{traits::Hash, RuntimeDebug};
+use sp_runtime::{
+	traits::{Hash, IntegerSquareRoot, Saturating},
+	RuntimeDebug,
+};
 use sp_std::{marker::PhantomData, prelude::*, result};
 
 use frame_support::{
@@ -67,8 +74,8 @@ use frame_support::{
 	dispatch::{DispatchError, DispatchResultWithPostInfo, Dispatchable, PostDispatchInfo},
 	ensure,
 	traits::{
-		Backing, ChangeMembers, EnsureOrigin, Get, GetBacking, InitializeMembers, StorageVersion,
-		UnixTime,
+		Backing, ChangeMembers, Currency, EnsureOrigin, Get, GetBacking, InitializeMembers,
+		StorageVersion, UnixTime,
 	},
 	weights::{GetDispatchInfo, Weight},
 };
@@ -224,6 +231,9 @@ pub struct Votes<AccountId, BlockNumber> {
 	end: BlockNumber,
 }
 
+pub type BalanceOf<T, I = ()> =
+	<<T as Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
@@ -279,6 +289,15 @@ pub mod pallet {
 
 		/// A provider to unix time.
 		type UnixTime: UnixTime;
+
+		/// The currency for payrolls.
+		type Currency: Currency<Self::AccountId>;
+
+		/// Interval between payrolls expressed in blocks
+		type PaymentInterval: Get<Self::BlockNumber>;
+
+		/// The base payment, final payment is multiplied by square root of member vote count.
+		type PaymentBase: Get<BalanceOf<Self, I>>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -350,6 +369,11 @@ pub mod pallet {
 	#[pallet::getter(fn prime)]
 	pub type Prime<T: Config<I>, I: 'static = ()> = StorageValue<_, T::AccountId, OptionQuery>;
 
+	/// The block number of the last payment.
+	#[pallet::storage]
+	pub type LastPayment<T: Config<I>, I: 'static = ()> =
+		StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config<I>, I: 'static = ()> {
@@ -404,6 +428,30 @@ pub mod pallet {
 		WrongProposalLength,
 		/// The member has got a new vote confirmed but actually has no new vote to claim.
 		InvalidVoteIncreaseConfirmation,
+	}
+
+	#[pallet::hooks]
+	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			let payment_interval = T::PaymentInterval::get();
+			let last_payment = LastPayment::<T, I>::get();
+
+			if last_payment + payment_interval <= n {
+				LastPayment::<T, I>::put(n);
+				let payment_base = T::PaymentBase::get();
+				for member_info in Members::<T, I>::get() {
+					let payroll = payment_base.saturating_add(
+						member_info.votes.integer_sqrt_checked().unwrap_or(0).into()
+					);
+					T::Currency::deposit_creating(
+						&member_info.id,
+						payroll,
+					);
+				}
+			}
+
+			0
+		}
 	}
 
 	// Note that councillor operations are assigned to the operational class.
@@ -909,7 +957,7 @@ pub mod pallet {
 				let vote_increase_period = T::VoteIncreasePeriod::get();
 				ensure!(
 					member_start_time + vote_increase_period <= now,
-					Error::<T, I>::InvalidVoteIncreaseConfirmation
+					Error::<T, I>::InvalidVoteIncreaseConfirmation,
 				);
 
 				member.last_vote_increase = Some(member_start_time - vote_increase_period);
