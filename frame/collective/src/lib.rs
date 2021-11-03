@@ -53,7 +53,7 @@
 //! Note: if a member can get 1 new vote, but it hasn't been confirmed, after 2 period of time, the
 //! member can get 2 new vote. The specified origin will need to confirm the increase 2 times.
 //!
-//! Additionally a payment system can be set to pay members. The payment happens every
+//! Additionally a payment system is set to pay members. The payment happens every
 //! [`Config::PaymentInterval`] and it of the amount: `payment_base * √vote_count` where payment
 //! base is configured  with [`Config::PaymentBase`].
 
