@@ -28,17 +28,19 @@
 //! [`ChangeMembers::change_members_sorted`].
 //!
 //! A "prime" member may be set to help determine the default vote behavior based on chain
-//! config: [`Config::DefaultVote`]. If [`PrimeDefaultVote`] is used, the prime vote acts as the default vote in case of any
-//! abstentions after the voting period. If [`MoreThanMajorityThenPrimeDefaultVote`] is used, then
-//! abstentions will first follow the majority of the collective voting, and then the prime
-//! member. If [`DefaultVoteNo`] is used then any abstentions after the voting period is a no vote.
+//! config: [`Config::DefaultVote`]. If [`PrimeDefaultVote`] is used, the prime vote acts as the
+//! default vote in case of any abstentions after the voting period. If
+//! [`MoreThanMajorityThenPrimeDefaultVote`] is used, then abstentions will first follow the
+//! majority of the collective voting, and then the prime member. If [`DefaultVoteNo`] is used then
+//! any abstentions after the voting period is a no vote.
 //!
 //! Voting happens through motions comprising a proposal (i.e. a curried dispatchable) plus a
 //! number of approvals required for it to pass and be called. Motions are open for members to
 //! vote on for a minimum period given by [`Config::MotionDuration`].
 //! After this duration any account can call into [`Call::close`] in order to close the proposal.
-//! Abstentions vote are fixed to approvals or rejections depending on the prime vote and the [`Config::DefaultVote`] configuration.
-//! If the proposal required approvals is reached then the proposal is executed, otherwise it is dropped.
+//! Abstentions vote are fixed to approvals or rejections depending on the prime vote and the
+//! [`Config::DefaultVote`] configuration. If the proposal required approvals is reached then the
+//! proposal is executed, otherwise it is dropped.
 //!
 //! A member can hold multiple votes, that means when they approve or reject a proposal, the
 //! proposal approvals or rejection will increase or decrease by the number of vote the member has.
@@ -65,7 +67,8 @@ use frame_support::{
 	dispatch::{DispatchError, DispatchResultWithPostInfo, Dispatchable, PostDispatchInfo},
 	ensure,
 	traits::{
-		Backing, ChangeMembers, EnsureOrigin, Get, GetBacking, InitializeMembers, StorageVersion, UnixTime,
+		Backing, ChangeMembers, EnsureOrigin, Get, GetBacking, InitializeMembers, StorageVersion,
+		UnixTime,
 	},
 	weights::{GetDispatchInfo, Weight},
 };
@@ -184,10 +187,7 @@ pub struct MemberVoteInfo<AccountId> {
 
 impl<AccountId> From<MemberInfo<AccountId>> for MemberVoteInfo<AccountId> {
 	fn from(x: MemberInfo<AccountId>) -> Self {
-		Self {
-			id: x.id,
-			votes: x.votes,
-		}
+		Self { id: x.id, votes: x.votes }
 	}
 }
 
@@ -898,12 +898,19 @@ pub mod pallet {
 			T::ConfirmVoteIncreaseOrigin::ensure_origin(origin)?;
 
 			Members::<T, I>::mutate(|members| {
-				let member = members.iter_mut().find(|info| info.id == beneficiary)
+				let member = members
+					.iter_mut()
+					.find(|info| info.id == beneficiary)
 					.ok_or(Error::<T, I>::NotMember)?;
-				let member_start_time = member.last_vote_increase.unwrap_or_else(|| T::UnixTime::first_block().as_secs());
+				let member_start_time = member
+					.last_vote_increase
+					.unwrap_or_else(|| T::UnixTime::first_block().as_secs());
 				let now = T::UnixTime::now().as_secs();
 				let vote_increase_period = T::VoteIncreasePeriod::get();
-				ensure!(member_start_time + vote_increase_period <= now, Error::<T, I>::InvalidVoteIncreaseConfirmation);
+				ensure!(
+					member_start_time + vote_increase_period <= now,
+					Error::<T, I>::InvalidVoteIncreaseConfirmation
+				);
 
 				member.last_vote_increase = Some(member_start_time - vote_increase_period);
 				member.votes = member.votes.saturating_add(1);
@@ -926,7 +933,9 @@ pub mod pallet {
 			T::ConfirmVoteIncreaseOrigin::ensure_origin(origin)?;
 
 			Members::<T, I>::mutate(|members| {
-				let member = members.iter_mut().find(|info| info.id == member)
+				let member = members
+					.iter_mut()
+					.find(|info| info.id == member)
 					.ok_or(Error::<T, I>::NotMember)?;
 				member.votes = votes;
 
@@ -1083,8 +1092,14 @@ impl<T: Config<I>, I: 'static> ChangeMembers<T::AccountId> for Pallet<T, I> {
 		Members::<T, I>::mutate(|mutate| {
 			for incoming in incoming {
 				match mutate.binary_search_by_key(&incoming, |info| &info.id) {
-					Err(index) =>
-						mutate.insert(index, MemberInfo { id: incoming.clone(), votes: 1, last_vote_increase: Some(T::UnixTime::now().as_secs()) }),
+					Err(index) => mutate.insert(
+						index,
+						MemberInfo {
+							id: incoming.clone(),
+							votes: 1,
+							last_vote_increase: Some(T::UnixTime::now().as_secs()),
+						},
+					),
 					_ => log::error!(
 						target: "runtime::collective",
 						"Unexpected incoming member alread exist in member set.",
@@ -1111,7 +1126,10 @@ impl<T: Config<I>, I: 'static> InitializeMembers<T::AccountId> for Pallet<T, I> 
 			let mut members = members.to_vec();
 			members.sort();
 			// Note: this function is called at genesis by definition.
-			let members = members.into_iter().map(|id| MemberInfo { id, votes: 1, last_vote_increase: None }).collect::<Vec<_>>();
+			let members = members
+				.into_iter()
+				.map(|id| MemberInfo { id, votes: 1, last_vote_increase: None })
+				.collect::<Vec<_>>();
 
 			Members::<T, I>::put(members);
 		}
