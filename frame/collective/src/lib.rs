@@ -49,13 +49,14 @@
 //!
 //! A member can get a new vote per configured period: [`Config::VoteIncreasePeriod`]. This new
 //! vote must be confirmed with the extrinsic [`Call::confirm_member_vote_increase`].
-//! The number of vote of a member can be reset with [`Call::reset_member_votes`].
+//! The number of vote of a member can be reset with [`Call::set_member_votes`].
 //! Note: if a member can get 1 new vote, but it hasn't been confirmed, after 2 period of time, the
 //! member can get 2 new vote. The specified origin will need to confirm the increase 2 times.
 //!
 //! Additionally a payment system is set to pay members. The payment happens every
 //! [`Config::PaymentInterval`] and it of the amount: `payment_base * √vote_count` where payment
-//! base is configured  with [`Config::PaymentBase`].
+//! base is set in storage [`PaymentBase`], and can be set at genesis and modified with
+//! [`Call::set_payment_base`].
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "128"]
@@ -293,11 +294,9 @@ pub mod pallet {
 		/// The currency for payrolls.
 		type Currency: Currency<Self::AccountId>;
 
-		/// Interval between payrolls expressed in blocks
-		type PaymentInterval: Get<Self::BlockNumber>;
-
-		/// The base payment, final payment is multiplied by square root of member vote count.
-		type PaymentBase: Get<BalanceOf<Self, I>>;
+		/// Some interval between payrolls expressed in blocks, or `None` if no payment should
+		/// happen.
+		type PaymentInterval: Get<Option<Self::BlockNumber>>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -307,12 +306,17 @@ pub mod pallet {
 	pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
 		pub phantom: PhantomData<I>,
 		pub members: Vec<T::AccountId>,
+		pub payment_base: BalanceOf<T, I>,
 	}
 
 	#[cfg(feature = "std")]
 	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
 		fn default() -> Self {
-			Self { phantom: Default::default(), members: Default::default() }
+			Self {
+				phantom: Default::default(),
+				members: Default::default(),
+				payment_base: Default::default(),
+			}
 		}
 	}
 
@@ -326,6 +330,8 @@ pub mod pallet {
 				self.members.len(),
 				"Members cannot contain duplicate accounts."
 			);
+
+			PaymentBase::<T, I>::put(self.payment_base);
 
 			Pallet::<T, I>::initialize_members(&self.members)
 		}
@@ -373,6 +379,11 @@ pub mod pallet {
 	#[pallet::storage]
 	pub type LastPayment<T: Config<I>, I: 'static = ()> =
 		StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+
+	/// The block number of the last payment.
+	#[pallet::storage]
+	pub type PaymentBase<T: Config<I>, I: 'static = ()> =
+		StorageValue<_, BalanceOf<T, I>, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -433,20 +444,18 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
 		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
-			let payment_interval = T::PaymentInterval::get();
-			let last_payment = LastPayment::<T, I>::get();
+			if let Some(payment_interval) = T::PaymentInterval::get() {
+				let last_payment = LastPayment::<T, I>::get();
 
-			if last_payment + payment_interval <= n {
-				LastPayment::<T, I>::put(n);
-				let payment_base = T::PaymentBase::get();
-				for member_info in Members::<T, I>::get() {
-					let payroll = payment_base.saturating_add(
-						member_info.votes.integer_sqrt_checked().unwrap_or(0).into()
-					);
-					T::Currency::deposit_creating(
-						&member_info.id,
-						payroll,
-					);
+				if last_payment.saturating_add(payment_interval) <= n {
+					LastPayment::<T, I>::put(n);
+					let payment_base = PaymentBase::<T, I>::get();
+					for member_info in Members::<T, I>::get() {
+						let payroll = payment_base.saturating_add(
+							member_info.votes.integer_sqrt_checked().unwrap_or(0).into(),
+						);
+						T::Currency::deposit_creating(&member_info.id, payroll);
+					}
 				}
 			}
 
@@ -967,18 +976,18 @@ pub mod pallet {
 			})
 		}
 
-		/// Reset the number of vote token, for the member.
+		/// Set the number of vote token, for the member.
 		///
 		/// Must be called by the Root origin.
 		///
 		/// NOTE: This doesn't upgrade its current votes.
 		#[pallet::weight(0)]
-		pub fn reset_member_votes(
+		pub fn set_member_votes(
 			origin: OriginFor<T>,
 			member: T::AccountId,
 			votes: VoteCount,
 		) -> DispatchResult {
-			T::ConfirmVoteIncreaseOrigin::ensure_origin(origin)?;
+			ensure_root(origin)?;
 
 			Members::<T, I>::mutate(|members| {
 				let member = members
@@ -989,6 +998,18 @@ pub mod pallet {
 
 				Ok(())
 			})
+		}
+
+		/// Set payment base value.
+		///
+		/// Must be called by the Root origin.
+		#[pallet::weight(0)]
+		pub fn set_payment_base(origin: OriginFor<T>, payment_base: BalanceOf<T, I>) -> DispatchResult {
+			ensure_root(origin)?;
+
+			PaymentBase::<T, I>::put(payment_base);
+
+			Ok(())
 		}
 	}
 }
