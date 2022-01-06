@@ -1,49 +1,48 @@
 [package]
-name = "pallet-timestamp"
-version = "4.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "FRAME Timestamp Module"
 documentation = "https://docs.rs/pallet-timestamp"
+edition = "2021"
+homepage = "https://substrate.io"
+license = "Apache-2.0"
+name = "pallet-timestamp"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "4.0.0-dev"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
-
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive", "max-encoded-len"] }
-scale-info = { version = "1.0", default-features = false, features = ["derive"] }
-sp-std = { version = "4.0.0-dev", default-features = false, path = "../../primitives/std" }
-sp-io = { version = "4.0.0-dev", default-features = false, path = "../../primitives/io", optional = true }
-sp-runtime = { version = "4.0.0-dev", default-features = false, path = "../../primitives/runtime" }
-sp-inherents = { version = "4.0.0-dev", default-features = false, path = "../../primitives/inherents" }
-frame-benchmarking = { version = "4.0.0-dev", default-features = false, path = "../benchmarking", optional = true }
-frame-support = { version = "4.0.0-dev", default-features = false, path = "../support" }
-frame-system = { version = "4.0.0-dev", default-features = false, path = "../system" }
-sp-timestamp = { version = "4.0.0-dev", default-features = false, path = "../../primitives/timestamp" }
-log = { version = "0.4.14", default-features = false }
+codec = {package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive", "max-encoded-len"]}
+frame-benchmarking = {version = "4.0.0-dev", default-features = false, path = "../benchmarking", optional = true}
+frame-support = {version = "4.0.0-dev", default-features = false, path = "../support"}
+frame-system = {version = "4.0.0-dev", default-features = false, path = "../system"}
+log = {version = "0.4.14", default-features = false}
+scale-info = {version = "1.0", default-features = false, features = ["derive"]}
+sp-inherents = {version = "4.0.0-dev", default-features = false, path = "../../primitives/inherents"}
+sp-io = {version = "4.0.0-dev", default-features = false, path = "../../primitives/io", optional = true}
+sp-runtime = {version = "4.0.0-dev", default-features = false, path = "../../primitives/runtime"}
+sp-std = {version = "4.0.0-dev", default-features = false, path = "../../primitives/std"}
+sp-timestamp = {version = "4.0.0-dev", default-features = false, path = "../../primitives/timestamp"}
 
 [dev-dependencies]
-sp-io ={ version = "4.0.0-dev", path = "../../primitives/io" }
-sp-core = { version = "4.0.0-dev", path = "../../primitives/core" }
+sp-core = {version = "4.0.0-dev", path = "../../primitives/core"}
+sp-io = {version = "4.0.0-dev", path = "../../primitives/io"}
 
 [features]
 default = ["std"]
-std = [
-	"sp-inherents/std",
-	"codec/std",
-	"scale-info/std",
-	"sp-std/std",
-	"sp-runtime/std",
-	"frame-benchmarking/std",
-	"frame-support/std",
-	"frame-system/std",
-	"sp-timestamp/std",
-	"log/std",
-]
 runtime-benchmarks = ["frame-benchmarking", "sp-io"]
+std = [
+  "sp-inherents/std",
+  "codec/std",
+  "scale-info/std",
+  "sp-std/std",
+  "sp-runtime/std",
+  "frame-benchmarking/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-timestamp/std",
+  "log/std",
+]
 try-runtime = ["frame-support/try-runtime"]

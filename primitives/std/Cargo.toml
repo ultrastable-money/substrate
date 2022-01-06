@@ -1,11 +1,11 @@
 [package]
-name = "sp-std"
-version = "4.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
-license = "Apache-2.0"
 homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
+license = "Apache-2.0"
+name = "sp-std"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "4.0.0-dev"
 
 description = "Lowest-abstraction level for the Substrate runtime: just exports useful primitives from std or client/alloc to be used with any code that depends on the runtime."
 documentation = "https://docs.rs/sp-std"

@@ -1,14 +1,13 @@
 [package]
-name = "sp-debug-derive"
-version = "3.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "Macros to derive runtime debug implementation."
 documentation = "https://docs.rs/sp-debug-derive"
-
+edition = "2021"
+homepage = "https://substrate.io"
+license = "Apache-2.0"
+name = "sp-debug-derive"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "3.0.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -17,12 +16,12 @@ targets = ["x86_64-unknown-linux-gnu"]
 proc-macro = true
 
 [dependencies]
+proc-macro2 = "1.0"
 quote = "1.0.10"
 syn = "1.0.80"
-proc-macro2 = "1.0"
 
 [features]
-default = [ "std" ]
+default = ["std"]
 std = []
 # By default `RuntimeDebug` implements `Debug` that outputs `<wasm:stripped>` when `std` is
 # disabled. However, sometimes downstream users need to have the real `Debug` implementation for

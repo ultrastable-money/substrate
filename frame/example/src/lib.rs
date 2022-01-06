@@ -27,7 +27,7 @@
 //! ### Documentation Guidelines:
 //!
 //! <!-- Original author of paragraph: Various. Based on collation of review comments to PRs
-//! addressing issues with --> <!-- label 'S3-FRAME' in https://github.com/paritytech/substrate-developer-hub/issues -->
+//! addressing issues with --> <!-- label 'S3-FRAME' in https://github.com/ultrastable-money/substrate-developer-hub/issues -->
 //! <ul>
 //! <li>Documentation comments (i.e. <code>/// comment</code>) - should
 //! accompany pallet functions and be restricted to the pallet interface,
@@ -36,7 +36,7 @@
 //! requires root, but without repeating the source code details.
 //! Capitalize the first word of each documentation comment and end it with
 //! a full stop. See
-//! <a href="https://github.com/paritytech/substrate#72-contributing-to-documentation-for-substrate-packages"
+//! <a href="https://github.com/ultrastable-money/substrate#72-contributing-to-documentation-for-substrate-packages"
 //! target="_blank"> Generic example of annotating source code with documentation comments</a></li>
 //!
 //! <li>Self-documenting code - Try to refactor code to be self-documenting.</li>
@@ -77,7 +77,7 @@
 //!
 //! \## Overview
 //!
-//! <!-- Original author of paragraph: Various. See https://github.com/paritytech/substrate-developer-hub/issues/44 -->
+//! <!-- Original author of paragraph: Various. See https://github.com/ultrastable-money/substrate-developer-hub/issues/44 -->
 //! // Short description of pallet's purpose.
 //! // Links to Traits that should be implemented.
 //! // What this pallet is for.
@@ -87,8 +87,8 @@
 //! // Inputs it uses and the source of each input.
 //! // Outputs it produces.
 //!
-//! <!-- Original author of paragraph: @Kianenigma in PR https://github.com/paritytech/substrate/pull/1951 -->
-//! <!-- and comment https://github.com/paritytech/substrate-developer-hub/issues/44#issuecomment-471982710 -->
+//! <!-- Original author of paragraph: @Kianenigma in PR https://github.com/ultrastable-money/substrate/pull/1951 -->
+//! <!-- and comment https://github.com/ultrastable-money/substrate-developer-hub/issues/44#issuecomment-471982710 -->
 //!
 //! \## Terminology
 //!
@@ -100,17 +100,17 @@
 //! be noted to give context to the pallet. // Please do not link to outside resources. The
 //! reference docs should be the ultimate source of truth.
 //!
-//! <!-- Original author of heading: @Kianenigma in PR https://github.com/paritytech/substrate/pull/1951 -->
+//! <!-- Original author of heading: @Kianenigma in PR https://github.com/ultrastable-money/substrate/pull/1951 -->
 //!
 //! \## Goals
 //!
 //! // Add goals that the custom pallet is designed to achieve.
 //!
-//! <!-- Original author of heading: @Kianenigma in PR https://github.com/paritytech/substrate/pull/1951 -->
+//! <!-- Original author of heading: @Kianenigma in PR https://github.com/ultrastable-money/substrate/pull/1951 -->
 //!
 //! \### Scenarios
 //!
-//! <!-- Original author of paragraph: @Kianenigma. Based on PR https://github.com/paritytech/substrate/pull/1951 -->
+//! <!-- Original author of paragraph: @Kianenigma. Based on PR https://github.com/ultrastable-money/substrate/pull/1951 -->
 //!
 //! \#### <INSERT_SCENARIO_NAME>
 //!
@@ -130,7 +130,7 @@
 //! <code>\`inherent\`</code> <INSERT_DESCRIPTION>
 //!
 //! <!-- Original author of paragraph: @Kianenigma in comment -->
-//! <!-- https://github.com/paritytech/substrate-developer-hub/issues/44#issuecomment-471982710 -->
+//! <!-- https://github.com/ultrastable-money/substrate-developer-hub/issues/44#issuecomment-471982710 -->
 //!
 //! \### Types
 //!
@@ -674,7 +674,7 @@ impl<T: Config> Pallet<T> {
 // Note that a signed extension can also indicate that a particular data must be present in the
 // _signing payload_ of a transaction by providing an implementation for the `additional_signed`
 // method. This example will not cover this type of extension. See `CheckSpecVersion` in
-// [FRAME System](https://github.com/paritytech/substrate/tree/master/frame/system#signed-extensions)
+// [FRAME System](https://github.com/ultrastable-money/substrate/tree/master/frame/system#signed-extensions)
 // for an example.
 //
 // Using the extension, you can add some hooks to the life cycle of each transaction. Note that by

@@ -6,7 +6,7 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../com
 version="$CI_COMMIT_TAG"
 
 # Note that this is not the last *tagged* version, but the last *published* version
-last_version=$(last_github_release 'paritytech/substrate')
+last_version=$(last_github_release 'ultrastable-money/substrate')
 
 release_text="$(./generate_release_text.sh "$last_version" "$version")"
 
@@ -25,7 +25,7 @@ data=$(jq -Rs --arg version "$version" \
   "prerelease": false
 }' < /dev/null)
 
-out=$(curl -s -X POST --data "$data" -H "Authorization: token $GITHUB_RELEASE_TOKEN" "$api_base/paritytech/substrate/releases")
+out=$(curl -s -X POST --data "$data" -H "Authorization: token $GITHUB_RELEASE_TOKEN" "$api_base/ultrastable-money/substrate/releases")
 
 html_url=$(echo "$out" | jq -r .html_url)
 

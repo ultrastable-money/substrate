@@ -1,7 +1,9 @@
 <!-- markdown-link-check-disable -->
+
 # Example Pallet
 
 <!-- Original author of paragraph: @gavofyork -->
+
 The Example: A simple example of a FRAME pallet demonstrating
 concepts, APIs and structures common to most FRAME runtimes.
 
@@ -10,7 +12,7 @@ Run `cargo doc --package pallet-example --open` to view this pallet's documentat
 ### Documentation Guidelines:
 
 <!-- Original author of paragraph: Various. Based on collation of review comments to PRs addressing issues with -->
-<!-- label 'S3-FRAME' in https://github.com/paritytech/substrate-developer-hub/issues -->
+<!-- label 'S3-FRAME' in https://github.com/ultrastable-money/substrate-developer-hub/issues -->
 <ul>
     <li>Documentation comments (i.e. <code>/// comment</code>) - should
         accompany pallet functions and be restricted to the pallet interface,
@@ -19,7 +21,7 @@ Run `cargo doc --package pallet-example --open` to view this pallet's documentat
         requires root, but without repeating the source code details.
         Capitalize the first word of each documentation comment and end it with
         a full stop. See
-        <a href="https://github.com/paritytech/substrate#72-contributing-to-documentation-for-substrate-packages"
+        <a href="https://github.com/ultrastable-money/substrate#72-contributing-to-documentation-for-substrate-packages"
         target="_blank"> Generic example of annotating source code with documentation comments</a></li>
     <li>Self-documenting code - Try to refactor code to be self-documenting.</li>
     <li>Code comments - Supplement complex code with a brief explanation, not every line of code.</li>
@@ -36,6 +38,7 @@ Run `cargo doc --package pallet-example --open` to view this pallet's documentat
 
 Copy and paste this template from frame/example/src/lib.rs into file
 `frame/<INSERT_CUSTOM_PALLET_NAME>/src/lib.rs` of your own custom pallet and complete it.
+
 <details><p><pre>
 // Add heading with custom pallet name
 
@@ -52,7 +55,8 @@ Copy and paste this template from frame/example/src/lib.rs into file
 
 \## Overview
 
-<!-- Original author of paragraph: Various. See https://github.com/paritytech/substrate-developer-hub/issues/44 -->
+<!-- Original author of paragraph: Various. See https://github.com/ultrastable-money/substrate-developer-hub/issues/44 -->
+
 // Short description of pallet's purpose.
 // Links to Traits that should be implemented.
 // What this pallet is for.
@@ -62,8 +66,8 @@ Copy and paste this template from frame/example/src/lib.rs into file
 // Inputs it uses and the source of each input.
 // Outputs it produces.
 
-<!-- Original author of paragraph: @Kianenigma in PR https://github.com/paritytech/substrate/pull/1951 -->
-<!-- and comment https://github.com/paritytech/substrate-developer-hub/issues/44#issuecomment-471982710 -->
+<!-- Original author of paragraph: @Kianenigma in PR https://github.com/ultrastable-money/substrate/pull/1951 -->
+<!-- and comment https://github.com/ultrastable-money/substrate-developer-hub/issues/44#issuecomment-471982710 -->
 
 \## Terminology
 
@@ -74,17 +78,17 @@ Copy and paste this template from frame/example/src/lib.rs into file
 // "free balance" and "reserved balance" should be noted to give context to the pallet.
 // Please do not link to outside resources. The reference docs should be the ultimate source of truth.
 
-<!-- Original author of heading: @Kianenigma in PR https://github.com/paritytech/substrate/pull/1951 -->
+<!-- Original author of heading: @Kianenigma in PR https://github.com/ultrastable-money/substrate/pull/1951 -->
 
 \## Goals
 
 // Add goals that the custom pallet is designed to achieve.
 
-<!-- Original author of heading: @Kianenigma in PR https://github.com/paritytech/substrate/pull/1951 -->
+<!-- Original author of heading: @Kianenigma in PR https://github.com/ultrastable-money/substrate/pull/1951 -->
 
 \### Scenarios
 
-<!-- Original author of paragraph: @Kianenigma. Based on PR https://github.com/paritytech/substrate/pull/1951 -->
+<!-- Original author of paragraph: @Kianenigma. Based on PR https://github.com/ultrastable-money/substrate/pull/1951 -->
 
 \#### <INSERT_SCENARIO_NAME>
 
@@ -103,7 +107,7 @@ Copy and paste this template from frame/example/src/lib.rs into file
 <code>\`inherent\`</code> <INSERT_DESCRIPTION>
 
 <!-- Original author of paragraph: @Kianenigma in comment -->
-<!-- https://github.com/paritytech/substrate-developer-hub/issues/44#issuecomment-471982710 -->
+<!-- https://github.com/ultrastable-money/substrate-developer-hub/issues/44#issuecomment-471982710 -->
 
 \### Types
 
@@ -233,6 +237,7 @@ pub trait Config: <INSERT_CUSTOM_PALLET_NAME>::Config { }
 
 // Links to reference material, if applicable. For example, Phragmen, W3F research, etc.
 // that the implementation is based on.
+
 </pre></p></details>
 
 License: Unlicense

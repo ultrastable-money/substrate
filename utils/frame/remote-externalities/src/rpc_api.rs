@@ -16,7 +16,7 @@
 // limitations under the License.
 
 //! WS RPC API for one off RPC calls to a substrate node.
-// TODO: Consolidate one off RPC calls https://github.com/paritytech/substrate/issues/8988
+// TODO: Consolidate one off RPC calls https://github.com/ultrastable-money/substrate/issues/8988
 
 use jsonrpsee_ws_client::{
 	types::{traits::Client, v2::params::JsonRpcParams},

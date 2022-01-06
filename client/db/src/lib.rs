@@ -358,7 +358,7 @@ impl DatabaseSource {
 	/// Return path for databases that are stored on disk.
 	pub fn path(&self) -> Option<&Path> {
 		match self {
-			// as per https://github.com/paritytech/substrate/pull/9500#discussion_r684312550
+			// as per https://github.com/ultrastable-money/substrate/pull/9500#discussion_r684312550
 			//
 			// IIUC this is needed for polkadot to create its own dbs, so until it can use parity db
 			// I would think rocksdb, but later parity-db.

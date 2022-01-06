@@ -437,7 +437,7 @@ impl RuntimeSpawn for RuntimeInstanceSpawn {
 					// Instantiating wasm here every time is suboptimal at the moment, shared
 					// pool of instances should be used.
 					//
-					// https://github.com/paritytech/substrate/issues/7354
+					// https://github.com/ultrastable-money/substrate/issues/7354
 					let mut instance =
 						module.new_instance().expect("Failed to create new instance from module");
 

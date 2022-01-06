@@ -270,7 +270,7 @@ Then, grab the Substrate source code:
 
 [source, shell]
 ----
-git clone https://github.com/paritytech/substrate.git
+git clone https://github.com/ultrastable-money/substrate.git
 cd substrate
 ----
 
@@ -333,7 +333,7 @@ Latest known working version: `a2a0eb5398d6223e531455b4c155ef053a4a3a2b`
 
 [source, shell]
 ----
-git clone https://github.com/paritytech/substrate.git
+git clone https://github.com/ultrastable-money/substrate.git
 cd substrate
 git checkout -b flaming-fir a2a0eb5398d6223e531455b4c155ef053a4a3a2b
 ----
@@ -367,7 +367,7 @@ In order to join the Emberic Elm testnet you should build from the `v1.0` branch
 
 [source, shell]
 ----
-git clone https://github.com/paritytech/substrate.git
+git clone https://github.com/ultrastable-money/substrate.git
 cd substrate
 git checkout -b v1.0 origin/v1.0
 ----
@@ -396,7 +396,7 @@ curl -H 'Content-Type: application/json' --data '{ "jsonrpc":"2.0", "method":"au
 
 If the Session keys need to match a fixed seed, they can be set individually key by key. The RPC call
 expects the key seed and the key type. The key types supported by default in Substrate are listed
-https://github.com/paritytech/substrate/blob/master/core/primitives/src/crypto.rs#L767[here], but the
+https://github.com/ultrastable-money/substrate/blob/master/core/primitives/src/crypto.rs#L767[here], but the
 user can declare any key type.
 
 ```
@@ -519,4 +519,4 @@ include::CODE_OF_CONDUCT.md[]
 
 == License
 
-https://github.com/paritytech/substrate/blob/master/LICENSE[LICENSE]
+https://github.com/ultrastable-money/substrate/blob/master/LICENSE[LICENSE]

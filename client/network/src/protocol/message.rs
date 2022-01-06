@@ -305,9 +305,9 @@ pub mod generic {
 	}
 
 	/// Status sent on connection.
-	// TODO https://github.com/paritytech/substrate/issues/4674: replace the `Status`
+	// TODO https://github.com/ultrastable-money/substrate/issues/4674: replace the `Status`
 	// struct with this one, after waiting a few releases beyond `NetworkSpecialization`'s
-	// removal (https://github.com/paritytech/substrate/pull/4665)
+	// removal (https://github.com/ultrastable-money/substrate/pull/4665)
 	//
 	// and set MIN_VERSION to 6.
 	#[derive(Debug, PartialEq, Eq, Clone, Encode, Decode)]

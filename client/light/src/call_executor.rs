@@ -186,7 +186,7 @@ where
 	let mut changes = OverlayedChanges::default();
 	let trie_backend = create_proof_check_backend(root, remote_proof)?;
 
-	// TODO: Remove when solved: https://github.com/paritytech/substrate/issues/5047
+	// TODO: Remove when solved: https://github.com/ultrastable-money/substrate/issues/5047
 	let backend_runtime_code = sp_state_machine::backend::BackendRuntimeCode::new(&trie_backend);
 	let runtime_code = backend_runtime_code
 		.runtime_code()

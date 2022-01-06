@@ -360,7 +360,7 @@ mod tests {
 	/// Regression test for the case where the `GossipEngine.network_event_stream` closes. One
 	/// should not ignore a `Poll::Ready(None)` as `poll_next_unpin` will panic on subsequent calls.
 	///
-	/// See https://github.com/paritytech/substrate/issues/5000 for details.
+	/// See https://github.com/ultrastable-money/substrate/issues/5000 for details.
 	#[test]
 	fn returns_when_network_event_stream_closes() {
 		let network = TestNetwork::default();

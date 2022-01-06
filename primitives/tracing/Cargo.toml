@@ -1,13 +1,13 @@
 [package]
-name = "sp-tracing"
-version = "4.0.0-dev"
-license = "Apache-2.0"
 authors = ["Parity Technologies <admin@parity.io>"]
+description = "Instrumentation primitives and macros for Substrate."
 edition = "2021"
 homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
-description = "Instrumentation primitives and macros for Substrate."
+license = "Apache-2.0"
+name = "sp-tracing"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "4.0.0-dev"
 
 [package.metadata.docs.rs]
 # let's default to wasm32
@@ -18,24 +18,24 @@ features = ["with-tracing"]
 targets = ["x86_64-unknown-linux-gnu", "wasm32-unknown-unknown"]
 
 [dependencies]
-sp-std = { version = "4.0.0-dev", path = "../std", default-features = false }
-codec = { version = "2.0.0", package = "parity-scale-codec", default-features = false, features = [
-	"derive",
-] }
-tracing = { version = "0.1.29", default-features = false }
-tracing-core = { version = "0.1.21", default-features = false }
-tracing-subscriber = { version = "0.2.25", optional = true, features = [
-	"tracing-log",
-] }
+codec = {version = "2.0.0", package = "parity-scale-codec", default-features = false, features = [
+  "derive",
+]}
+sp-std = {version = "4.0.0-dev", path = "../std", default-features = false}
+tracing = {version = "0.1.29", default-features = false}
+tracing-core = {version = "0.1.21", default-features = false}
+tracing-subscriber = {version = "0.2.25", optional = true, features = [
+  "tracing-log",
+]}
 
 [features]
 default = ["std"]
-with-tracing = ["codec/derive", "codec/full"]
 std = [
-	"with-tracing",
-	"tracing/std",
-	"tracing-core/std",
-	"codec/std",
-	"sp-std/std",
-	"tracing-subscriber",
+  "with-tracing",
+  "tracing/std",
+  "tracing-core/std",
+  "codec/std",
+  "sp-std/std",
+  "tracing-subscriber",
 ]
+with-tracing = ["codec/derive", "codec/full"]

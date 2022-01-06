@@ -1,12 +1,12 @@
 [package]
-name = "frame-support-procedural-tools-derive"
-version = "3.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "Use to derive parsing for parsing struct."
+edition = "2021"
+homepage = "https://substrate.io"
+license = "Apache-2.0"
+name = "frame-support-procedural-tools-derive"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "3.0.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -16,5 +16,5 @@ proc-macro = true
 
 [dependencies]
 proc-macro2 = "1.0.29"
-quote = { version = "1.0.10", features = ["proc-macro"] }
-syn = { version = "1.0.80", features = ["proc-macro" ,"full", "extra-traits", "parsing"] }
+quote = {version = "1.0.10", features = ["proc-macro"]}
+syn = {version = "1.0.80", features = ["proc-macro", "full", "extra-traits", "parsing"]}

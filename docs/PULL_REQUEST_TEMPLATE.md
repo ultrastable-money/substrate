@@ -1,5 +1,3 @@
-
-
 ✄ -----------------------------------------------------------------------------
 
 Thank you for your Pull Request! 🙏
@@ -18,7 +16,7 @@ Before you submit, please check that:
   - [ ] Github project assignment
 - [ ] **Related Issues:** You mentioned a related issue if this PR is related to it, e.g. `Fixes #228` or `Related #1337`.
 - [ ] **2 Reviewers:** You asked at least two reviewers to review. If you aren't sure, start with GH suggestions.
-- [ ] **Style Guide:** Your PR adheres to [the style guide](https://github.com/paritytech/substrate/blob/master/docs/STYLE_GUIDE.md)
+- [ ] **Style Guide:** Your PR adheres to [the style guide](https://github.com/ultrastable-money/substrate/blob/master/docs/STYLE_GUIDE.md)
   - In particular, mind the maximal line length of 100 (120 in exceptional circumstances).
   - There is no commented code checked in unless necessary.
   - Any panickers in the runtime have a proof or were removed.
@@ -28,7 +26,7 @@ Before you submit, please check that:
   - [ ] If so, do you have the corresponding Polkadot PR ready?
   - [ ] Optionally: Do you have a corresponding Cumulus PR?
 
-Refer to [the contributing guide](https://github.com/paritytech/substrate/blob/master/docs/CONTRIBUTING.adoc) for details.
+Refer to [the contributing guide](https://github.com/ultrastable-money/substrate/blob/master/docs/CONTRIBUTING.adoc) for details.
 
 After you've read this notice feel free to remove it.
 Thank you!
