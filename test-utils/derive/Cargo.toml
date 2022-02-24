@@ -1,18 +1,18 @@
 [package]
-name = "substrate-test-utils-derive"
-version = "0.10.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "Substrate test utilities macros"
+edition = "2021"
+homepage = "https://substrate.io"
+license = "Apache-2.0"
+name = "substrate-test-utils-derive"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "0.10.0-dev"
 
 [dependencies]
-quote = "1.0.10"
-syn = { version = "1.0.81", features = ["full"] }
 proc-macro-crate = "1.1.0"
 proc-macro2 = "1.0.29"
+quote = "1.0.10"
+syn = {version = "1.0.81", features = ["full"]}
 
 [lib]
 proc-macro = true

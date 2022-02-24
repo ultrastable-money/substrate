@@ -1,49 +1,49 @@
 [package]
-name = "sp-trie"
-version = "4.0.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
 description = "Patricia trie stuff using a parity-scale-codec node format"
-repository = "https://github.com/paritytech/substrate/"
-license = "Apache-2.0"
+documentation = "https://docs.rs/sp-trie"
 edition = "2021"
 homepage = "https://substrate.io"
-documentation = "https://docs.rs/sp-trie"
+license = "Apache-2.0"
+name = "sp-trie"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "4.0.0-dev"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [[bench]]
-name = "bench"
 harness = false
+name = "bench"
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false }
-scale-info = { version = "1.0", default-features = false, features = ["derive"] }
-sp-std = { version = "4.0.0", default-features = false, path = "../std" }
-hash-db = { version = "0.15.2", default-features = false }
-trie-db = { version = "0.22.6", default-features = false }
-trie-root = { version = "0.16.0", default-features = false }
-memory-db = { version = "0.27.0", default-features = false }
-sp-core = { version = "4.0.0", default-features = false, path = "../core" }
+codec = {package = "parity-scale-codec", version = "2.0.0", default-features = false}
+hash-db = {version = "0.15.2", default-features = false}
+memory-db = {version = "0.27.0", default-features = false}
+scale-info = {version = "1.0", default-features = false, features = ["derive"]}
+sp-core = {version = "4.0.0", default-features = false, path = "../core"}
+sp-std = {version = "4.0.0", default-features = false, path = "../std"}
+trie-db = {version = "0.22.6", default-features = false}
+trie-root = {version = "0.16.0", default-features = false}
 
 [dev-dependencies]
-trie-bench = "0.28.0"
-trie-standardmap = "0.15.2"
 criterion = "0.3.3"
 hex-literal = "0.3.4"
-sp-runtime = { version = "4.0.0-dev", path = "../runtime" }
+sp-runtime = {version = "4.0.0-dev", path = "../runtime"}
+trie-bench = "0.28.0"
+trie-standardmap = "0.15.2"
 
 [features]
 default = ["std"]
-std = [
-	"sp-std/std",
-	"codec/std",
-	"scale-info/std",
-	"hash-db/std",
-	"memory-db/std",
-	"trie-db/std",
-	"trie-root/std",
-	"sp-core/std",
-]
 memory-tracker = []
+std = [
+  "sp-std/std",
+  "codec/std",
+  "scale-info/std",
+  "hash-db/std",
+  "memory-db/std",
+  "trie-db/std",
+  "trie-root/std",
+  "sp-core/std",
+]

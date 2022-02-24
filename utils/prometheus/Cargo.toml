@@ -1,26 +1,26 @@
 [package]
-description = "Endpoint to expose Prometheus metrics"
-name = "substrate-prometheus-endpoint"
-version = "0.10.0-dev"
-license = "Apache-2.0"
 authors = ["Parity Technologies <admin@parity.io>"]
+description = "Endpoint to expose Prometheus metrics"
 edition = "2021"
 homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
+license = "Apache-2.0"
+name = "substrate-prometheus-endpoint"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "0.10.0-dev"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-log = "0.4.8"
-prometheus = { version = "0.13.0", default-features = false }
-futures-util = { version = "0.3.17", default-features = false, features = ["io"] }
+async-std = {version = "1.10.0", features = ["unstable"]}
 derive_more = "0.99"
-async-std = { version = "1.10.0", features = ["unstable"] }
+futures-util = {version = "0.3.17", default-features = false, features = ["io"]}
+hyper = {version = "0.14.14", default-features = false, features = ["http1", "server", "tcp"]}
+log = "0.4.8"
+prometheus = {version = "0.13.0", default-features = false}
 tokio = "1.13"
-hyper = { version = "0.14.14", default-features = false, features = ["http1", "server", "tcp"] }
 
 [dev-dependencies]
-hyper = { version = "0.14.14", features = ["client"] }
-tokio = { version = "1.13", features = ["rt-multi-thread"] }
+hyper = {version = "0.14.14", features = ["client"]}
+tokio = {version = "1.13", features = ["rt-multi-thread"]}

@@ -1,17 +1,17 @@
 [package]
-name = "sc-proposer-metrics"
-version = "0.10.0-dev"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "Basic metrics for block production."
+edition = "2021"
+homepage = "https://substrate.io"
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+name = "sc-proposer-metrics"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "0.10.0-dev"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 log = "0.4.8"
-prometheus-endpoint = { package = "substrate-prometheus-endpoint", path = "../../utils/prometheus", version = "0.10.0-dev"}
+prometheus-endpoint = {package = "substrate-prometheus-endpoint", path = "../../utils/prometheus", version = "0.10.0-dev"}
