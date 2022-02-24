@@ -1,17 +1,17 @@
 [package]
-name = "node-runtime-generate-bags"
-version = "3.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "Bag threshold generation script for pallet-bag-list and node-runtime."
+edition = "2021"
+homepage = "https://substrate.io"
+license = "Apache-2.0"
+name = "node-runtime-generate-bags"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "3.0.0"
 
 [dependencies]
-node-runtime = { version = "3.0.0-dev", path = "../../../../bin/node/runtime" }
-generate-bags = { version = "4.0.0-dev", path = "../" }
+generate-bags = {version = "4.0.0-dev", path = "../"}
+node-runtime = {version = "3.0.0-dev", path = "../../../../bin/node/runtime"}
 
 # third-party
 structopt = "0.3.25"

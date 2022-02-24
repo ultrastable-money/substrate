@@ -1,17 +1,17 @@
 [package]
-name = "fork-tree"
-version = "3.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-license = "Apache-2.0"
-homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
 description = "Utility library for managing tree-like ordered data with logic for pruning the tree while finalizing nodes."
 documentation = "https://docs.rs/fork-tree"
+edition = "2021"
+homepage = "https://substrate.io"
+license = "Apache-2.0"
+name = "fork-tree"
 readme = "README.md"
+repository = "https://github.com/ultrastable-money/substrate/"
+version = "3.0.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }
+codec = {package = "parity-scale-codec", version = "2.0.0", features = ["derive"]}
